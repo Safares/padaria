@@ -1,121 +1,75 @@
-# 🥐 Padaria Pão Fresquinho — Backend API
+# padaria-backend
 
-API REST em **Node.js + Express** conectada ao **Supabase (PostgreSQL)**.
+API REST para gerenciamento de padaria. Node.js + Express com banco PostgreSQL via Supabase.
 
----
+## Instalação
 
-## ⚙️ Configuração
-
-### 1. Instalar dependências
 ```bash
 npm install
 ```
 
-### 2. Configurar o banco no `.env`
-Abra o arquivo `.env` e troque `YOUR_PASSWORD_AQUI` pela sua senha do Supabase:
-```env
-DB_HOST=db.ueiwzqtwwhxjszzulkas.supabase.co
-DB_PORT=5432
-DB_NAME=postgres
-DB_USER=postgres
-DB_PASSWORD=SUA_SENHA_REAL_AQUI
-PORT=3000
-```
+Copie o `.env.example` para `.env` e preencha com suas credenciais do Supabase:
 
-### 3. Rodar a API
 ```bash
-npm start
+cp .env.example .env
 ```
 
-A API estará disponível em: `http://localhost:3000`
+## Rodando
 
----
-
-## 📡 Endpoints
-
-### Produtos
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | `/produtos` | Lista todos (filtros: `?ativo=true&busca=pão`) |
-| GET | `/produtos/:id` | Busca por ID |
-| POST | `/produtos` | Cadastrar produto |
-| PUT | `/produtos/:id` | Atualizar produto |
-| PATCH | `/produtos/:id/estoque` | Ajustar estoque (`{ "quantidade": -5 }`) |
-| DELETE | `/produtos/:id` | Desativar (soft delete) |
-
-### Clientes
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | `/clientes` | Lista todos (filtros: `?busca=gabriel`) |
-| GET | `/clientes/:id` | Busca por ID |
-| GET | `/clientes/:id/vendas` | Histórico de compras |
-| POST | `/clientes` | Cadastrar cliente |
-| PUT | `/clientes/:id` | Atualizar cliente |
-| DELETE | `/clientes/:id` | Desativar |
-
-### Funcionários
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | `/funcionarios` | Lista todos |
-| GET | `/funcionarios/:id` | Busca por ID |
-| POST | `/funcionarios` | Cadastrar |
-| PUT | `/funcionarios/:id` | Atualizar |
-
-### Vendas
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | `/vendas` | Lista com filtros (`?status=CONCLUIDA&cliente_id=1`) |
-| GET | `/vendas/:id` | Venda completa com itens |
-| POST | `/vendas` | Registrar nova venda |
-| PATCH | `/vendas/:id/status` | Alterar status (cancela e estorna estoque) |
-
-### Relatórios
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | `/relatorios/dashboard` | Resumo do dia (vendas, fiado, estoque baixo) |
-| GET | `/relatorios/vendas-por-dia?dias=7` | Vendas agrupadas por dia |
-| GET | `/relatorios/produtos-mais-vendidos?limite=10` | Ranking de produtos |
-| GET | `/relatorios/formas-pagamento?dias=30` | Totais por forma de pagamento |
-
----
-
-## 📦 Exemplo — Registrar uma Venda
-
-**POST** `/vendas`
-```json
-{
-  "cliente_id": 1,
-  "funcionario_id": 1,
-  "forma_pagamento": "PIX",
-  "tipo_venda": "BALCAO",
-  "itens": [
-    { "produto_id": 1, "quantidade": 10, "preco_unitario": 0.75 },
-    { "produto_id": 16, "quantidade": 2,  "preco_unitario": 5.00 }
-  ]
-}
+```bash
+npm run dev    # desenvolvimento
+npm start      # produção
 ```
 
-A API automaticamente:
-- Calcula o total
-- Valida o estoque de cada produto
-- Baixa o estoque
-- Tudo dentro de uma **transação** (rollback automático em caso de erro)
+API disponível em `http://localhost:3000`
 
----
+## Rotas
 
-## 🗂️ Estrutura de Arquivos
+**Produtos** — `/produtos`
+- `GET /produtos` — lista todos, aceita `?busca=pão&ativo=true`
+- `GET /produtos/:id`
+- `POST /produtos` — cadastrar
+- `PUT /produtos/:id` — atualizar
+- `PATCH /produtos/:id/estoque` — ajustar estoque `{ "quantidade": -5 }`
+- `DELETE /produtos/:id` — desativa (soft delete)
+
+**Clientes** — `/clientes`
+- `GET /clientes` — aceita `?busca=nome`
+- `GET /clientes/:id`
+- `GET /clientes/:id/vendas` — histórico de compras
+- `POST /clientes`
+- `PUT /clientes/:id`
+- `DELETE /clientes/:id`
+
+**Funcionários** — `/funcionarios`
+- `GET /funcionarios`
+- `GET /funcionarios/:id`
+- `POST /funcionarios`
+- `PUT /funcionarios/:id`
+
+**Vendas** — `/vendas`
+- `GET /vendas` — aceita `?status=CONCLUIDA&cliente_id=1`
+- `GET /vendas/:id` — retorna venda com itens
+- `POST /vendas` — registra venda, baixa estoque e calcula total em transação
+- `PATCH /vendas/:id/status` — altera status, cancela e estorna estoque se necessário
+
+**Relatórios** — `/relatorios`
+- `GET /relatorios/dashboard` — resumo do dia
+- `GET /relatorios/vendas-por-dia?dias=7`
+- `GET /relatorios/produtos-mais-vendidos?limite=10`
+- `GET /relatorios/formas-pagamento?dias=30`
+
+## Estrutura
 
 ```
-padaria-backend/
-├── .env                      ← suas credenciais (não commitar!)
-├── package.json
-└── src/
-    ├── server.js             ← ponto de entrada
-    ├── db.js                 ← pool de conexão com o Supabase
-    └── routes/
-        ├── produtos.js
-        ├── clientes.js
-        ├── funcionarios.js
-        ├── vendas.js         ← lógica de transação + estoque
-        └── relatorios.js     ← dashboard e relatórios
+src/
+├── server.js
+├── db.js
+└── routes/
+    ├── produtos.js
+    ├── clientes.js
+    ├── funcionarios.js
+    ├── vendas.js
+    ├── fiado.js
+    └── relatorios.js
 ```
