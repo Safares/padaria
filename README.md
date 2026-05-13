@@ -1,5 +1,7 @@
 # padaria-backend
 
+🔗 **Demo em produção:** https://padariassz-production.up.railway.app/
+
 API REST para gerenciamento de padaria. Node.js + Express com banco PostgreSQL via Supabase.
 
 ## Instalação
